@@ -3,7 +3,7 @@ from gym import error, spaces, utils
 from gym.utils import seeding
 
 
-def cmp(a, b):
+def cmp(b, a):
     return float(a > b) - float(a < b)
 
 
