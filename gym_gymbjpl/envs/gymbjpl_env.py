@@ -64,7 +64,7 @@ class GymbjplEnv(gym.Env):
     def step(self, action):
         assert self.action_space.contains(action)
 
-        if sum(self.player) < 12:
+        if sum(self.player) < 13:
             done = True
             reward = -1.
         else:
