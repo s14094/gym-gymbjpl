@@ -3,7 +3,7 @@ from gym import error, spaces, utils
 from gym.utils import seeding
 
 
-def cmp(b, a):
+def cmp(a, b):
     return float(a > b) - float(a < b)
 
 
@@ -74,7 +74,7 @@ class GymbjplEnv(gym.Env):
                 self.player.append(draw_card(self.np_random))
                 if is_bust(self.player):
                     done = True
-                    reward = -1.
+                    reward = 1.
                 else:
                     done = False
                     reward = 0.
