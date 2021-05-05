@@ -7,7 +7,6 @@ def cmp(a, b):
     return float(a > b) - float(a < b)
 
 
-# 1 = Ace, 2-10 = Number cards, Jack/Queen/King = 10
 deck = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
 
 
@@ -42,49 +41,54 @@ def is_natural(hand):  # Is this hand a natural blackjack?
 
 
 class GymbjplEnv(gym.Env):
-  metadata = {'render.modes': ['human']}
+    metadata = {'render.modes': ['human']}
 
-  def __init__(self, natural=False):
-      self.action_space = spaces.Discrete(2)
-      self.observation_space = spaces.Tuple((
-          spaces.Discrete(32),
-          spaces.Discrete(11),
-          spaces.Discrete(2)))
-      self.seed()
+    def __init__(self, natural=False):
+        self.action_space = spaces.Discrete(2)
+        self.observation_space = spaces.Tuple((
+            spaces.Discrete(32),
+            spaces.Discrete(11),
+            spaces.Discrete(2)))
+        self.seed()
 
-      # Flag to payout 1.5 on a "natural" blackjack win, like casino rules
-      # Ref: http://www.bicyclecards.com/how-to-play/blackjack/
-      self.natural = natural
-      # Start the first game
-      self.reset()
+        # Flag to payout 1.5 on a "natural" blackjack win, like casino rules
+        # Ref: http://www.bicyclecards.com/how-to-play/blackjack/
+        self.natural = natural
+        # Start the first game
+        self.reset()
 
-  def seed(self, seed=None):
-      self.np_random, seed = seeding.np_random(seed)
-      return [seed]
+    def seed(self, seed=None):
+        self.np_random, seed = seeding.np_random(seed)
+        return [seed]
 
-  def step(self, action):
-      assert self.action_space.contains(action)
-      if action:  # hit: add a card to players hand and return
-          self.player.append(draw_card(self.np_random))
-          if is_bust(self.player):
-              done = True
-              reward = -1.
-          else:
-              done = False
-              reward = 0.
-      else:  # stick: play out the dealers hand, and score
-          done = True
-          while sum_hand(self.dealer) < 17:
-              self.dealer.append(draw_card(self.np_random))
-          reward = cmp(score(self.player), score(self.dealer))
-          if self.natural and is_natural(self.player) and reward == 1.:
-              reward = 1.5
-      return self._get_obs(), reward, done, {}
+    def step(self, action):
+        assert self.action_space.contains(action)
 
-  def _get_obs(self):
-      return (sum_hand(self.player), self.dealer[0], usable_ace(self.player))
+        if sum(self.player) < 12:
+            done = True
+            reward = -1.
+        else:
+            if action:  # hit: add a card to players hand and return
+                self.player.append(draw_card(self.np_random))
+                if is_bust(self.player):
+                    done = True
+                    reward = -1.
+                else:
+                    done = False
+                    reward = 0.
+            else:  # stick: play out the dealers hand, and score
+                done = True
+                while sum_hand(self.dealer) < 17:
+                    self.dealer.append(draw_card(self.np_random))
+                reward = cmp(score(self.player), score(self.dealer))
+                if self.natural and is_natural(self.player) and reward == 1.:
+                    reward = 1.5
+        return self._get_obs(), reward, done, {}
 
-  def reset(self):
-      self.dealer = draw_hand(self.np_random)
-      self.player = draw_hand(self.np_random)
-      return self._get_obs()
+    def _get_obs(self):
+        return (sum_hand(self.player), self.dealer[0], usable_ace(self.player))
+
+    def reset(self):
+        self.dealer = draw_hand(self.np_random)
+        self.player = draw_hand(self.np_random)
+        return self._get_obs()
