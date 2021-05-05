@@ -63,10 +63,12 @@ class GymbjplEnv(gym.Env):
 
     def step(self, action):
         assert self.action_space.contains(action)
-
-        if sum(self.player) < 13:
+        if sum(self.player) == 12:
+            print(sum(self.player))
             done = True
             reward = -1.
+            while sum_hand(self.dealer) < 17:
+                self.dealer.append(draw_card(self.np_random))
         else:
             if action:  # hit: add a card to players hand and return
                 self.player.append(draw_card(self.np_random))
