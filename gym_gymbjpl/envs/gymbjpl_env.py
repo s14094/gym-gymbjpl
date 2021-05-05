@@ -76,7 +76,7 @@ class GymbjplEnv(gym.Env):
                 else:
                     if is_bust(self.player):
                         done = True
-                        reward = -1.
+                        reward = 1.
                     else:
                         done = False
                         reward = 0.
